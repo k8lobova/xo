@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:group_button/group_button.dart';
+import 'package:collection/collection.dart';
 
 void main() {
   runApp(const MyApp());
@@ -60,6 +61,56 @@ class _MyHomePageState extends State<MyHomePage> {
   int countWinO = 0;
   int countWinX = 0;
   List<String> buttons = List<String>.generate(9, (index) => '');
+  Color? colorCurrentPlayer = Colors.green[900];
+  Color? colorNextPlayer = Colors.red[900];
+
+  Color? _currentPlayer1() {
+    if (currentPlayer % 2 != 0){
+      return colorCurrentPlayer;
+    }
+    else {
+      return colorNextPlayer;
+    }
+  }
+
+  Color? _currentPlayer2() {
+    if (currentPlayer % 2 == 0){
+      return colorCurrentPlayer;
+    }
+    else {
+      return colorNextPlayer;
+    }
+  }
+
+  bool _checkWin() {
+    List<List<int>> winConditions = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8],
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8],
+      [0, 4, 8],
+      [2, 4, 6],
+    ];
+
+    for (var condition in winConditions) {
+      if (buttons[condition[0]] == x &&
+          buttons[condition[1]] == x &&
+          buttons[condition[2]] == x) {
+        print('Player X Wins');
+        return true;
+      }
+      if (buttons[condition[0]] == o &&
+          buttons[condition[1]] == o &&
+          buttons[condition[2]] == o) {
+        print('Player O Wins');
+        return true;
+      }
+    }
+    return false;
+  }
+
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
   // how it looks.
@@ -84,11 +135,13 @@ class _MyHomePageState extends State<MyHomePage> {
                 children: [
                   Text(
                     namePlayer1,
-                    style: TextStyle(fontSize: 18),
+                    style: TextStyle(fontSize: 18,
+                        color: _currentPlayer1()),
                   ),
                   Text(
                     '$countWinO',
-                    style: TextStyle(fontSize: 18),
+                    style: TextStyle(fontSize: 18,
+                    ),
                   ),
                 ],
               ),
@@ -97,7 +150,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 children: [
                   Text(
                     namePlayer2,
-                    style: TextStyle(fontSize: 18),
+                    style: TextStyle(fontSize: 18,
+                        color: _currentPlayer2()),
                   ),
                   Text(
                     '$countWinX',
@@ -142,6 +196,9 @@ class _MyHomePageState extends State<MyHomePage> {
           child: GroupButton(
             buttons: buttons,
             onSelected: (buttonText, index, isSelected) => setState(() {
+              if (_checkWin() == true) {
+                return;
+              }
               if (buttons[index] != '') return;
               if (currentPlayer % 2 == 0) {
                 print('$currentPlayer ... $index ... $x ... $isSelected');
@@ -151,6 +208,16 @@ class _MyHomePageState extends State<MyHomePage> {
                 print('$currentPlayer ... $index ... $o ... $isSelected');
                 buttons[index] = o;
                 currentPlayer += 1;
+              }
+              print(buttons);
+              if (_checkWin() == true) {
+                print('Game is Over');
+                return;
+              }
+              if (currentPlayer == 9) {
+                print('No One Wins');
+                print('Game is Over');
+                return;
               }
             }),
             isRadio: false,
