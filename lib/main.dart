@@ -52,37 +52,40 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String noneText = '';
   String o = 'O';
   String x = 'X';
   String namePlayer1 = 'Player O';
   String namePlayer2 = 'Player X';
+  final String win = 'Wins';
+  final String notWin = 'No One Wins';
+  String currentWin = '';
   int currentPlayer = 0;
-  int countWinO = 0;
-  int countWinX = 0;
-  List<String> buttons = List<String>.generate(9, (index) => '');
+  int countWin1 = 0;
+  int countWin2 = 0;
+
+  //List<String> buttons = List<String>.generate(9, (index) => '');
+  List<String> buttons = List.filled(9, '');
+  final List<String> buttonsStart = List.filled(9, '');
   Color? colorCurrentPlayer = Colors.green[900];
   Color? colorNextPlayer = Colors.red[900];
 
   Color? _currentPlayer1() {
-    if (currentPlayer % 2 != 0){
+    if (currentPlayer % 2 != 0) {
       return colorCurrentPlayer;
-    }
-    else {
+    } else {
       return colorNextPlayer;
     }
   }
 
   Color? _currentPlayer2() {
-    if (currentPlayer % 2 == 0){
+    if (currentPlayer % 2 == 0) {
       return colorCurrentPlayer;
-    }
-    else {
+    } else {
       return colorNextPlayer;
     }
   }
 
-  bool _checkWin() {
+  int _checkWin() {
     List<List<int>> winConditions = [
       [0, 1, 2],
       [3, 4, 5],
@@ -98,17 +101,24 @@ class _MyHomePageState extends State<MyHomePage> {
       if (buttons[condition[0]] == x &&
           buttons[condition[1]] == x &&
           buttons[condition[2]] == x) {
-        print('Player X Wins');
-        return true;
+        //print('Player X Wins');
+        currentWin = namePlayer2 + ' ' + win;
+        return 2;
       }
       if (buttons[condition[0]] == o &&
           buttons[condition[1]] == o &&
           buttons[condition[2]] == o) {
-        print('Player O Wins');
-        return true;
+        //print('Player O Wins');
+        currentWin = namePlayer1 + ' ' + win;
+        return 1;
       }
     }
-    return false;
+
+    if (currentPlayer == 9) {
+      currentWin = notWin;
+      return 3;
+    }
+    return 0;
   }
 
   // This widget is the home page of your application. It is stateful, meaning
@@ -135,12 +145,12 @@ class _MyHomePageState extends State<MyHomePage> {
                 children: [
                   Text(
                     namePlayer1,
-                    style: TextStyle(fontSize: 18,
-                        color: _currentPlayer1()),
+                    style: TextStyle(fontSize: 18, color: _currentPlayer1()),
                   ),
                   Text(
-                    '$countWinO',
-                    style: TextStyle(fontSize: 18,
+                    '$countWin1',
+                    style: TextStyle(
+                      fontSize: 18,
                     ),
                   ),
                 ],
@@ -150,11 +160,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 children: [
                   Text(
                     namePlayer2,
-                    style: TextStyle(fontSize: 18,
-                        color: _currentPlayer2()),
+                    style: TextStyle(fontSize: 18, color: _currentPlayer2()),
                   ),
                   Text(
-                    '$countWinX',
+                    '$countWin2',
                     style: TextStyle(fontSize: 18),
                   ),
                 ],
@@ -163,83 +172,99 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ),
       ),
-      floatingActionButton: TextButton(
-          onPressed: () {
-            setState(() {
-              if (currentPlayer % 2 == 0) {
-                print(currentPlayer);
-                noneText = x;
-                currentPlayer += 1;
-              } else {
-                print(currentPlayer);
-                noneText = o;
-                currentPlayer += 1;
-              }
-            });
-          },
-          child: Container(
-            child: Text(
-              noneText,
-            ),
-          ),
-          style: TextButton.styleFrom(
-            textStyle: TextStyle(fontSize: 15),
-            backgroundColor: Colors.purple,
-            foregroundColor: Colors.white,
-          )),
       body: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: 40,
         ),
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: GroupButton(
-            buttons: buttons,
-            onSelected: (buttonText, index, isSelected) => setState(() {
-              if (_checkWin() == true) {
-                return;
-              }
-              if (buttons[index] != '') return;
-              if (currentPlayer % 2 == 0) {
-                print('$currentPlayer ... $index ... $x ... $isSelected');
-                buttons[index] = x;
-                currentPlayer += 1;
-              } else {
-                print('$currentPlayer ... $index ... $o ... $isSelected');
-                buttons[index] = o;
-                currentPlayer += 1;
-              }
-              print(buttons);
-              if (_checkWin() == true) {
-                print('Game is Over');
-                return;
-              }
-              if (currentPlayer == 9) {
-                print('No One Wins');
-                print('Game is Over');
-                return;
-              }
-            }),
-            isRadio: false,
-            options: GroupButtonOptions(
-              buttonHeight: 120,
-              buttonWidth: 120,
-              //Color: Colors.grey[300], // Цвет кнопок по умолчанию
-              selectedColor: Colors.deepPurple[300], // Цвет кнопок при нажатии
-              selectedTextStyle: TextStyle(
-                fontSize: 20,
-                color: Colors.pink[900],
+        child: Column(
+          children: [
+            Align(
+              alignment: Alignment.topCenter,
+              child: GroupButton(
+                buttons: buttons,
+                onSelected: (buttonText, index, isSelected) => setState(() {
+                  if (_checkWin() != 0) {
+                    return;
+                  }
+                  if (buttons[index] != '') return;
+                  if (currentPlayer % 2 == 0) {
+                    print('$currentPlayer ... $index ... $x ... $isSelected');
+                    buttons[index] = x;
+                    currentPlayer += 1;
+                  } else {
+                    print('$currentPlayer ... $index ... $o ... $isSelected');
+                    buttons[index] = o;
+                    currentPlayer += 1;
+                  }
+                  print(buttons);
+                  if (_checkWin() != 0) {
+                    print('Game is Over');
+                    return;
+                  }
+                }),
+                isRadio: false,
+                options: GroupButtonOptions(
+                  buttonHeight: 120,
+                  buttonWidth: 120,
+                  //Color: Colors.grey[300], // Цвет кнопок по умолчанию
+                  selectedColor: Colors.deepPurple[300],
+                  // Цвет кнопок при нажатии
+                  selectedTextStyle: TextStyle(
+                    fontSize: 20,
+                    color: Colors.pink[900],
+                  ),
+                  unselectedColor: Colors.deepPurple[300],
+                  unselectedTextStyle: TextStyle(
+                    fontSize: 20,
+                    color: Colors.pink[900],
+                  ),
+                  //border: Colors.black, // Цвет границы кнопок
+                  borderRadius: BorderRadius.circular(10),
+                  //mainAxisAlignment: MainAxisAlignment.center,
+                ),
               ),
-              unselectedColor: Colors.deepPurple[300],
-              unselectedTextStyle: TextStyle(
-                fontSize: 20,
-                color: Colors.pink[900],
-              ),
-              //border: Colors.black, // Цвет границы кнопок
-              borderRadius: BorderRadius.circular(10),
-              //mainAxisAlignment: MainAxisAlignment.center,
             ),
-          ),
+            SizedBox(height: 40),
+            Text(
+              currentWin,
+              style: TextStyle(fontSize: 18, color: Colors.pink[900]),
+            ),
+            SizedBox(height: 40),
+          if (_checkWin() != 0)
+              ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      buttons = buttonsStart;
+                      currentPlayer = 0;
+                      if (_checkWin() == 0) {
+                        print(_checkWin());
+                        print(0);
+                      }
+                      if (_checkWin() == 1) {
+                        countWin1 += 1;
+                      }
+                      if (_checkWin() == 2) {
+                        countWin2 += 1;
+                      }
+                      currentWin = '';
+                      });
+                    print('buttons = $buttons');
+                    print('currentPlayer = $currentPlayer');
+                    print('currentWin = $currentWin');
+                    print(_checkWin());
+                    print('1 = $countWin1 ... 2 = $countWin2');
+                  },
+                  child: Container(
+                    child: Text(
+                      'Play Again',
+                    ),
+                  ),
+                  style: TextButton.styleFrom(
+                    textStyle: TextStyle(fontSize: 15),
+                    backgroundColor: Colors.purple,
+                    foregroundColor: Colors.white,
+                  )),
+          ],
         ),
       ),
     );
